@@ -200,6 +200,7 @@ Pi Coding Agent에서 `pi-antigravity` 확장을 통해 Antigravity 백엔드(Go
 
 ### [완료] PR 4: Request Envelope 라벨 정규화 및 `model_enum` 동적 캐시 (`feat/envelope-labels`)
 
+- **PR**: [Rahularya01/pi-antigravity#39](https://github.com/Rahularya01/pi-antigravity/pull/39)
 - **브랜치명**: `feat/envelope-labels` (Worktree: `~/Projects/pi-antigravity-envelope-labels`)
 - **배경**:
   - 순정 `agy` CLI 실측 라벨:
