@@ -101,14 +101,15 @@ export type GeminiToolConfig = {
   };
 };
 
+export type ThinkingWire = {
+  includeThoughts: boolean;
+  thinkingBudget: number;
+};
+
 export type GeminiGenerationConfig = {
   temperature?: number;
   maxOutputTokens?: number;
-  thinkingConfig?: {
-    includeThoughts?: boolean;
-    thinkingLevel?: "MINIMAL" | "LOW" | "MEDIUM" | "HIGH";
-    thinkingBudget?: number;
-  };
+  thinkingConfig?: ThinkingWire;
 };
 
 export type GeminiRequestBody = {
