@@ -160,10 +160,7 @@ async function smokeOne(publicId) {
         requestId: utils.nowRequestId(),
       };
 
-      const headers = {
-        ...client.antigravityHeaders(refreshed.access),
-        ...(isClaude ? { "anthropic-beta": "interleaved-thinking-2025-05-14" } : {}),
-      };
+      const headers = client.antigravityHeaders(refreshed.access);
 
       for (const ep of client.endpointCandidates()) {
         usedEndpoint = ep;
