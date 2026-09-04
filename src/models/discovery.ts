@@ -9,6 +9,7 @@ import {
   applyAntigravityCatalog,
   getCurrentAntigravityCatalog,
   PROVIDER_ID,
+  registerDiscoveredModelEnums,
 } from "./models.js";
 import { isUsableCatalog, readCatalogCache, writeCatalogCache } from "./cache.js";
 import { buildAntigravityCatalog, resolvedCatalog, type AntigravityCatalog } from "./grouping.js";
@@ -36,6 +37,7 @@ export async function discoverAntigravityModels(
   const creds = parseApiKey(apiKey);
   const available = await fetchAvailableModelsCatalog(creds.token, creds.projectId, signal);
   const models = available.data.models ?? {};
+  registerDiscoveredModelEnums(models);
   return buildAntigravityCatalog(models, fallbackCatalog());
 }
 

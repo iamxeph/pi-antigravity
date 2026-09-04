@@ -19,11 +19,11 @@ Pi Coding Agent에서 `pi-antigravity` 확장을 통해 Antigravity 백엔드(Go
 
 ## 2. 5대 차원별 실측 지문 비교표 (Diff Table)
 
-| 차원 (Dimension)                        | 순정 `agy` CLI (실측)                                                                                                                                                                                                                              | 현재 `pi-antigravity` (v0.7.1)                                                                                                                                                                                   | `CLIProxyAPI`                                                                | 불일치 여부 & 위험도                                                                                                                   |
-| :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
-| **User-Agent**                          | `antigravity/cli/1.1.23 (aidev_client; os_type=linux; arch=amd64; cl=974125021; auth_method=consumer)`                                                                                                                                             | `antigravity/hub/2.8.0 (aidev_client; os_type=darwin; arch=arm64; cl=963137146)`                                                                                                                                 | `antigravity/hub/2.11.0 darwin/arm64` (매니페스트 자동 갱신)                 | **해결 완료 (PR 1)**<br>기존: `cli` 대신 `hub` 표기, Linux amd64 환경에서도 `darwin/arm64` 고정, `auth_method=consumer` 누락           |
-| **HTTP Headers**                        | - `Host`<br>- `User-Agent`<br>- `Authorization: Bearer ...`<br>- `Content-Type: application/json`<br>- `Accept-Encoding: gzip`                                                                                                                     | - 상동 헤더 포함<br>- **추가 전송 (누출)**:<br> * `Accept: text/event-stream`<br> * `X-Goog-Api-Client: google-cloud-sdk vscode_cloudshelleditor/0.1`<br> * `Client-Metadata: {"ideType":"ANTIGRAVITY",...}`     | - 헤더 정돈 완료 (VS Code 헤더 없음)<br>- `Accept: text/event-stream` 미전송 | **해결 완료 (PR 1)**<br>기존: VS Code 플러그인 전용 헤더 누출로 비공식 클라이언트 즉시 식별 가능                                       |
-| **Thinking Config**                     | `thinkingConfig: { includeThoughts: true, thinkingBudget: <int> }`<br>- Gemini 3.8/3.7/3.6: High `-1`, Med `4000`, Low `1000`, Off `0`<br>- Gemini 3.1 Pro: High `10001`, Low `1001`, Off `0`<br>- Claude Sonnet/Opus: `1024`<br>- GPT-OSS: `8192` | `thinkingConfig: { includeThoughts: true, thinkingLevel: "HIGH" }`<br>(Claude, GPT-OSS는 `thinkingConfig` 생략)                                                                                                  | `auto`면 `-1`, 그 외 `thinkingLevel` 문자열                                  | **해결 완료 (PR 2)**<br>기존: 전 모델에서 `thinkingLevel` 문자열 대신 정수 예산(`thinkingBudget`) 전송 필요                            |
+| 차원 (Dimension)                        | 순정 `agy` CLI (실측)                                                                                                                                                                                                                              | 현재 `pi-antigravity` (v0.7.1)                                                                                                                                                                                                                                                                                                                                                                      | `CLIProxyAPI`                                                                | 불일치 여부 & 위험도                                                                                                                                                                                                               |
+| :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **User-Agent**                          | `antigravity/cli/1.1.23 (aidev_client; os_type=linux; arch=amd64; cl=974125021; auth_method=consumer)`                                                                                                                                             | `antigravity/hub/2.8.0 (aidev_client; os_type=darwin; arch=arm64; cl=963137146)`                                                                                                                                                                                                                                                                                                                    | `antigravity/hub/2.11.0 darwin/arm64` (매니페스트 자동 갱신)                 | **해결 완료 (PR 1)**<br>기존: `cli` 대신 `hub` 표기, Linux amd64 환경에서도 `darwin/arm64` 고정, `auth_method=consumer` 누락                                                                                                       |
+| **HTTP Headers**                        | - `Host`<br>- `User-Agent`<br>- `Authorization: Bearer ...`<br>- `Content-Type: application/json`<br>- `Accept-Encoding: gzip`                                                                                                                     | - 상동 헤더 포함<br>- **비표준 헤더 누출 (해결됨)**:<br> * `Accept: text/event-stream`<br> * `X-Goog-Api-Client: google-cloud-sdk vscode_cloudshelleditor/0.1`<br> * `Client-Metadata: {"ideType":"ANTIGRAVITY",...}`<br>- **잔여 누출 (PR 4 대상)**:<br> * `anthropic-beta: interleaved-thinking-2025-05-14` (Claude reasoning 호출 시)<br> * `Accept: application/json` (모델 디스커버리 호출 시) | - 헤더 정돈 완료 (VS Code 헤더 없음)<br>- `Accept: text/event-stream` 미전송 | **부분 해결 (위험도: 높음 - PR 4 예정)**<br>- 해결 완료: VS Code 플러그인 전용 헤더 3종 제거 완료 (PR 1)<br>- 잔여 누출: Claude reasoning 시 `anthropic-beta` 헤더 누출, `fetchAvailableModels` 시 `Accept: application/json` 누출 |
+| **Thinking Config**                     | `thinkingConfig: { includeThoughts: true, thinkingBudget: <int> }`<br>- Gemini 3.8/3.7/3.6: High `-1`, Med `4000`, Low `1000`, Off `0`<br>- Gemini 3.1 Pro: High `10001`, Low `1001`, Off `0`<br>- Claude Sonnet/Opus: `1024`<br>- GPT-OSS: `8192` | `thinkingConfig: { includeThoughts: true, thinkingLevel: "HIGH" }`<br>(Claude, GPT-OSS는 `thinkingConfig` 생략)                                                                                                                                                                                                                                                                                     | `auto`면 `-1`, 그 외 `thinkingLevel` 문자열                                  | **해결 완료 (PR 2)**<br>기존: 전 모델에서 `thinkingLevel` 문자열 대신 정수 예산(`thinkingBudget`) 전송 필요                                                                                                                        |
 | **Labels (`request.labels`)**           | ```json                                                                                                                                                                                                                                            |
 | {                                       |
 | "last_step_index": "0",                 |
@@ -41,12 +41,12 @@ Pi Coding Agent에서 `pi-antigravity` 확장을 통해 Antigravity 백엔드(Go
 | "used_claude": "false",                 |
 | "used_claude_conservative": "false"     |
 | }                                       |
-| ```                                     | 미구현 또는 단순 래핑                                                                                                                                                                                                                              | **불일치 (높음 - PR 4 예정)**<br>- `request_id` 누락<br>- `used_non_gemini_model` 누락<br>- `model_enum` 동적 매핑 실패 (구형 3.5 모델만 정적 하드코딩되어 3.7/3.8에서 증발)<br>- `last_step_index`가 '1'로 고정 |
-| **Request ID**                          | `agent/<conv_uuid>/<epoch_ms>/<traj_uuid>/<step>`                                                                                                                                                                                                  | `agent/<new_uuid>/<epoch_ms>/<traj_uuid>/2`                                                                                                                                                                      | `agent-<uuid>`                                                               | **불일치 (낮음 - PR 4 예정)**<br>`pi-antigravity`는 세션 유지 대신 턴마다 conv_uuid를 재생성하고 step을 2로 고정                       |
-| **Tool Config**                         | Gemini / Claude / GPT-OSS 전 모델 호출 시 `toolConfig` 생략 (`undefined`)                                                                                                                                                                          | `toolConfig: { functionCallingConfig: { mode: "VALIDATED" } }` 항상 강제 전송                                                                                                                                    | Claude 등 특정 모델만 `VALIDATED` 적용                                       | **해결 완료 (PR 3)**<br>기존: 도구 존재 시 무조건 `mode: "VALIDATED"`를 강제하고, 도구 없는 Claude에도 주입하여 VS Code 확장 지문 누출 |
-| **Endpoint Priority**                   | `https://daily-cloudcode-pa.googleapis.com` 단일 호출                                                                                                                                                                                              | daily $\rightarrow$ sandbox $\rightarrow$ prod(cloudcode-pa) 순차 폴백                                                                                                                                           | daily $\rightarrow$ prod 폴백                                                | **양호**<br>daily 1순위는 일치                                                                                                         |
-| **loadCodeAssist Payload**              | `{"metadata":{"ideType":"ANTIGRAVITY"}}`                                                                                                                                                                                                           | `{"metadata":{"ideType":"ANTIGRAVITY","platform":"PLATFORM_UNSPECIFIED","pluginType":"GEMINI"}}`                                                                                                                 | `{"metadata":{"ideType":"ANTIGRAVITY"}}`                                     | **해결 완료 (PR 1)**<br>기존: 불필요한 metadata 필드 포함                                                                              |
-| **OAuth Flow**                          | Client ID 및 Scope 6종 일치                                                                                                                                                                                                                        | Client ID 및 Scope 6종 일치                                                                                                                                                                                      | Client ID 및 Scope 6종 일치                                                  | **일치**                                                                                                                               |
+| ```                                     | 미구현 또는 단순 래핑                                                                                                                                                                                                                              | **불일치 (높음 - PR 4 예정)**<br>- `request_id` 누락<br>- `used_non_gemini_model` 누락<br>- `model_enum` 동적 매핑 실패 (구형 3.5 모델만 정적 하드코딩되어 3.7/3.8에서 증발)<br>- `last_step_index`가 '1'로 고정                                                                                                                                                                                    |
+| **Request ID**                          | `agent/<conv_uuid>/<epoch_ms>/<traj_uuid>/<step>`                                                                                                                                                                                                  | `agent/<new_uuid>/<epoch_ms>/<traj_uuid>/2`                                                                                                                                                                                                                                                                                                                                                         | `agent-<uuid>`                                                               | **불일치 (낮음 - PR 4 예정)**<br>`pi-antigravity`는 세션 유지 대신 턴마다 conv_uuid를 재생성하고 step을 2로 고정                                                                                                                   |
+| **Tool Config**                         | Gemini / Claude / GPT-OSS 전 모델 호출 시 `toolConfig` 생략 (`undefined`)                                                                                                                                                                          | `toolConfig: { functionCallingConfig: { mode: "VALIDATED" } }` 항상 강제 전송                                                                                                                                                                                                                                                                                                                       | Claude 등 특정 모델만 `VALIDATED` 적용                                       | **해결 완료 (PR 3)**<br>기존: 도구 존재 시 무조건 `mode: "VALIDATED"`를 강제하고, 도구 없는 Claude에도 주입하여 VS Code 확장 지문 누출                                                                                             |
+| **Endpoint Priority**                   | `https://daily-cloudcode-pa.googleapis.com` 단일 호출                                                                                                                                                                                              | daily $\rightarrow$ sandbox $\rightarrow$ prod(cloudcode-pa) 순차 폴백                                                                                                                                                                                                                                                                                                                              | daily $\rightarrow$ prod 폴백                                                | **양호**<br>daily 1순위는 일치                                                                                                                                                                                                     |
+| **loadCodeAssist Payload**              | `{"metadata":{"ideType":"ANTIGRAVITY"}}`                                                                                                                                                                                                           | `{"metadata":{"ideType":"ANTIGRAVITY","platform":"PLATFORM_UNSPECIFIED","pluginType":"GEMINI"}}`                                                                                                                                                                                                                                                                                                    | `{"metadata":{"ideType":"ANTIGRAVITY"}}`                                     | **해결 완료 (PR 1)**<br>기존: 불필요한 metadata 필드 포함                                                                                                                                                                          |
+| **OAuth Flow**                          | Client ID 및 Scope 6종 일치                                                                                                                                                                                                                        | Client ID 및 Scope 6종 일치                                                                                                                                                                                                                                                                                                                                                                         | Client ID 및 Scope 6종 일치                                                  | **일치**                                                                                                                                                                                                                           |
 
 ---
 
@@ -69,14 +69,36 @@ Pi Coding Agent에서 `pi-antigravity` 확장을 통해 Antigravity 백엔드(Go
 
 ### 3.2. HTTP Header 누출
 
-- `src/client/client.ts`의 구 `antigravityHeaders` 함수가 다음 헤더들을 강제 주입하고 있었습니다:
-  - `X-Goog-Api-Client: google-cloud-sdk vscode_cloudshelleditor/0.1`
-  - `Client-Metadata: {"ideType":"ANTIGRAVITY","platform":"LINUX","pluginType":"GEMINI"}`
-  - `Accept: text/event-stream`
-- **실측 증거**:
-  `agy` CLI가 보낸 모든 HTTP 요청(`streamGenerateContent`, `fetchAvailableModels`, `retrieveUserQuotaSummary` 등)에서 위의 3개 헤더는 단 한 번도 나타나지 않았습니다. `agy`는 `Host`, `User-Agent`, `Authorization`, `Content-Type`, `Accept-Encoding: gzip`만 전송합니다.
-- **개선 반영 (PR 1 완료)**:
-  - 비표준 헤더 3종을 전면 제거하고 불필요한 `loadCodeAssist` 페이로드 필드를 축소했습니다 (`da9514b`).
+- **기존 VS Code 전용 헤더 누출 (PR 1 해결 완료)**:
+  - `src/client/client.ts`의 구 `antigravityHeaders` 함수가 다음 헤더들을 강제 주입하고 있었습니다:
+    - `X-Goog-Api-Client: google-cloud-sdk vscode_cloudshelleditor/0.1`
+    - `Client-Metadata: {"ideType":"ANTIGRAVITY","platform":"LINUX","pluginType":"GEMINI"}`
+    - `Accept: text/event-stream`
+  - **실측 증거**:
+    `agy` CLI가 보낸 모든 HTTP 요청(`streamGenerateContent`, `fetchAvailableModels`, `retrieveUserQuotaSummary` 등)에서 위의 3개 헤더는 단 한 번도 나타나지 않았습니다. `agy`는 `Host`, `User-Agent`, `Authorization`, `Content-Type`, `Accept-Encoding: gzip`만 전송합니다.
+  - **개선 반영 (PR 1 완료)**:
+    - 비표준 헤더 3종을 전면 제거하고 불필요한 `loadCodeAssist` 페이로드 필드를 축소했습니다 (`da9514b`).
+
+- **코드 분석 중 추가 발견된 잔여 헤더 누출 (PR 4 해결 예정)**:
+  1. **Claude Thinking 호출 시 `anthropic-beta` 누출 (`src/stream/stream.ts:666`)**:
+     ```ts
+     const isClaudeReasoning = model.id.startsWith("claude-") && model.reasoning;
+     const requestHeaders: Record<string, string> = {
+       ...antigravityHeaders(creds.token),
+       ...(isClaudeReasoning ? { "anthropic-beta": "interleaved-thinking-2025-05-14" } : {}),
+     };
+     ```
+     순정 `agy` CLI는 Claude reasoning 사용 시에도 오직 바디의 `thinkingConfig: { includeThoughts: true, thinkingBudget: 1024 }`만 전송하며, Anthropic 직접 호출용 전용 헤더인 `anthropic-beta`는 절대 전송하지 않습니다. Google Cloud Code Assist 백엔드에서 비공식 프록시/서드파티 클라이언트로 즉시 탐지될 수 있는 핵심 위험 요소입니다.
+  2. **모델 디스커버리 시 `Accept: application/json` 누출 (`src/client/client.ts:400`)**:
+     ```ts
+     function jsonHeaders(token: string): Record<string, string> {
+       return {
+         ...antigravityHeaders(token),
+         Accept: "application/json",
+       };
+     }
+     ```
+     순정 `agy` CLI는 `fetchAvailableModels`를 호출할 때도 `Accept` 헤더를 보내지 않습니다. `antigravityHeaders(token)`만으로 일원화해야 합니다.
 
 ### 3.3. `model_enum` 동적 매핑 결여
 
@@ -176,7 +198,7 @@ Pi Coding Agent에서 `pi-antigravity` 확장을 통해 Antigravity 백엔드(Go
 
 ---
 
-### [대기] PR 4: Request Envelope 라벨 정규화 및 `model_enum` 동적 캐시 (`feat/envelope-labels`)
+### [완료] PR 4: Request Envelope 라벨 정규화 및 `model_enum` 동적 캐시 (`feat/envelope-labels`)
 
 - **브랜치명**: `feat/envelope-labels` (Worktree: `~/Projects/pi-antigravity-envelope-labels`)
 - **배경**:
@@ -192,20 +214,30 @@ Pi Coding Agent에서 `pi-antigravity` 확장을 통해 Antigravity 백엔드(Go
       "used_non_gemini_model": "false"
     }
     ```
-  - 현재 `pi-antigravity`는 `request_id`, `used_non_gemini_model`이 누락되어 있고, `last_step_index`가 `"1"`로 고정되어 있으며, 구형 3.5 모델 외 최신 모델의 `model_enum`이 증발함
-- **변경 상세**:
-  1. **`src/types/types.ts` (`ModelInfoRaw`)**:
-     - `model?: unknown` 필드 추가 (`MODEL_PLACEHOLDER_M...` enum 파싱용)
-  2. **동적 `model_enum` 추출 및 캐시 (`src/client/client.ts`, `src/models/discovery.ts`)**:
-     - `/v1internal:fetchAvailableModels` 응답의 `data.models[modelId].model` 값을 추출하여 런타임 맵/캐시에 보관
-  3. **Envelope 및 Labels 정규화 (`src/utils/util.ts`)**:
-     - `labels.last_step_index`: `${step - 1}` (첫 턴 `"0"`)
-     - `labels.request_id`: `${trajectoryId}-${step - 1}` 추가
+  - 기존 `pi-antigravity`는 `request_id`, `used_non_gemini_model`이 누락되어 있었고, `last_step_index`가 `"1"`로 고정되어 있었으며, 구형 3.5 모델 외 최신 모델의 `model_enum`이 증발했음
+  - Claude reasoning 호출 시 비표준 `anthropic-beta` 헤더 및 모델 디스커버리 시 `Accept: application/json` 헤더가 전송되는 잔여 누출이 존재했음
+- **주요 반영 내용**:
+  1. **타입 정의 보강 (`src/types/types.ts`)**:
+     - `ModelInfoRaw`에 `model?: unknown` 추가 (`MODEL_PLACEHOLDER_M...` enum 파싱)
+     - `DynamicModelInfo`에 `model?: string` 추가
+     - `AntigravityStreamOptions.toolChoice` 호환성 정합 (`Omit<SimpleStreamOptions, "toolChoice"> & { toolChoice?: ToolChoice | `${ToolChoice}`; }`)
+  2. **동적 `model_enum` 추출 및 정적 fallback 확충 (`src/models/models.ts`, `src/client/client.ts`, `src/models/discovery.ts`)**:
+     - `ANTIGRAVITY_MODEL_ENUM`에 실측 14개 전 모델(Gemini 3.8/3.7/3.6 Flash, Gemini Pro, Claude Sonnet/Opus, GPT-OSS 120B 등) 정적 fallback 보강
+     - `getModelEnum(wireModelId: string)`: 런타임 동적 캐시 우선 조회 후 정적 fallback 조회
+     - `fetchAvailableModels` 응답의 `model` 필드(`MODEL_PLACEHOLDER_M...`)를 추출하여 동적 캐시 등록
+  3. **Envelope 및 Labels 정규화 (`src/utils/util.ts`, `src/stream/stream.ts`)**:
+     - `labels.last_step_index`: `String(contents.length - 1)` (0-based, 실제 전달되는 `request.contents`의 마지막 요소 인덱스)
+     - `labels.request_id`: `${trajectoryId}-${requestIndex}` (해당 세션 내 streamGenerateContent 요청 순번, 직전 assistant 응답 수 기반)
      - `labels.used_non_gemini_model`: 비-Gemini(Claude, GPT-OSS 등) 여부에 따라 `"true"` / `"false"` 추가
-     - `labels.model_enum`: 런타임 캐시에서 조회하여 주입 (기존 하드코딩 맵은 디스커버리 전 fallback으로만 활용)
-     - `requestId`: `agent/${convId}/${Date.now()}/${trajectoryId}/${step}` 포맷 유지 및 턴 카운터(step) 지원
-  4. **테스트 코드 갱신**:
-     - `scripts/test-model-discovery.ts`, `scripts/test-model-routing.ts`에 동적 `model_enum` 추출 및 신규 라벨 필드 검증 추가
+     - `labels.used_claude` / `used_claude_conservative`: Claude 여부에 따라 `"true"` / `"false"` 정합
+     - `labels.model_enum`: `getModelEnum(wireModelId)`에서 조회된 enum 주입
+     - `requestId`: `agent/${agentId}/${Date.now()}/${trajectoryId}/${step}` 포맷 유지 (여기서 `step = contents.length`, `trajectoryId`는 첫 메시지 기반 `stableUuid`로 Pi 재시작 시에도 100% 동일 복원)
+  4. **잔여 비표준 헤더 누출 2종 제거 (`src/stream/stream.ts`, `src/client/client.ts`)**:
+     - `src/stream/stream.ts`: Claude reasoning 시 주입되던 `anthropic-beta: interleaved-thinking-2025-05-14` 헤더 완전 제거
+     - `src/client/client.ts`: `fetchAvailableModels` 시 `Accept: application/json` 제거하여 `antigravityHeaders(token)`로 통일
+  5. **단위 및 회귀 테스트 갱신**:
+     - `scripts/test-model-discovery.ts`: 동적 `model_enum` 추출 및 캐시 검증, `Accept: application/json` 부재 검증
+     - `scripts/test-model-routing.ts`: Gemini 3.8/3.7/3.6, Claude, GPT-OSS 14개 전 모델 대상 7개 라벨 필드, 잔여 헤더 부재, 멀티턴 `step` 증가 검증 통과
 
 ---
 
