@@ -139,13 +139,15 @@ async function smokeOne(publicId) {
         publicId === "gemini-3.6-flash"
       ) {
         generationConfig.thinkingConfig = {
-          includeThoughts: true,
-          thinkingLevel:
-            EFFORT === "high" || EFFORT === "xhigh"
-              ? "HIGH"
-              : EFFORT === "medium"
-                ? "MEDIUM"
-                : "LOW",
+          includeThoughts: EFFORT !== "off",
+          thinkingBudget:
+            EFFORT === "off"
+              ? 0
+              : EFFORT === "high" || EFFORT === "xhigh"
+                ? -1
+                : EFFORT === "medium"
+                  ? 4000
+                  : 1000,
         };
       }
       const body = {
