@@ -132,7 +132,7 @@ async function smokeOne(publicId) {
     for (let i = 0; i < candidates.length; i++) {
       runtimeModel = candidates[i];
       const isClaude = publicId.startsWith("claude-") || runtimeModel.startsWith("claude-");
-      const generationConfig: Record<string, unknown> = { maxOutputTokens: 256 };
+      const generationConfig = { maxOutputTokens: 256 };
       if (
         publicId === "gemini-3.8-flash" ||
         publicId === "gemini-3.7-flash" ||
